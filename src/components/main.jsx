@@ -50,16 +50,22 @@ export function Main() {
 
     const scrollShift = (newScroll, scrollWidth) => {
         if (newScroll >= scrollWidth / 2) {
-            return scrollWidth / 2 - newScroll
+            return newScroll - scrollWidth / 2
         }
         return newScroll
     }
 
+    let destination = 0
     const onArrowCLick = () => {
         const scroller = ref.current.querySelector('.section__panel:not(.section__panel_hidden)');
         if (scroller) {
 
             const currentScroll = scroller.scrollLeft;
+
+            const scrollWidth = scroller.scrollWidth;
+
+            //endScrollPos = Math.max(0, currentScroll + 400 - scrollWidth / 2);
+            destination = currentScroll + 400
 
             scroller.scrollTo({
                 left: currentScroll + 400,
@@ -79,11 +85,27 @@ export function Main() {
 
             // console.log("hand ", currentScroll, scrollWidth, scrollPos)
 
-            if (scrollPos < currentScroll) {
+            if (scrollPos < currentScroll && (destination === 0 || currentScroll >= destination)) {
                 scroller.scrollTo({
-                    left: 0,
+                    left: scrollPos,
                 });
+
+                destination = 0
+
+                // if (endScrollPos > 0) {
+                //     console.log("forward")
+                //     scroller.scrollTo({
+                //         left: endScrollPos - scrollPos,
+                //         behavior: 'smooth'
+                //     });
+                //     endScrollPos = 0
+
+                // }
             }
+            // if (scrollPos < currentScroll && currentScroll >= destination) {
+
+            // }
+
         }
     }
 
