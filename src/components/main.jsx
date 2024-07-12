@@ -1,13 +1,15 @@
 import React from 'react';
 
-import {Event} from './event';
-import {TABS, TABS_KEYS} from '../constants/tabs'
+import { Event } from './event';
+import { TABS, TABS_KEYS } from '../constants/tabs'
 
 export function Main() {
     const ref = React.useRef();
     const initedRef = React.useRef(false);
     const [activeTab, setActiveTab] = React.useState('');
     const [hasRightScroll, setHasRightScroll] = React.useState(false);
+
+    const [scrollOffset, setScrollOffset] = React.useState(0);
 
     React.useEffect(() => {
         if (!activeTab && !initedRef.current) {
@@ -25,6 +27,7 @@ export function Main() {
         sizes = [...sizes, size];
     };
 
+
     React.useEffect(() => {
         const sumWidth = sizes.reduce((acc, item) => acc + item.width, 0);
         const sumHeight = sizes.reduce((acc, item) => acc + item.height, 0);
@@ -35,15 +38,55 @@ export function Main() {
         }
     });
 
+    // const onArrowCLick = () => {
+    //     const scroller = ref.current.querySelector('.section__panel:not(.section__panel_hidden)');
+    //     if (scroller) {
+    //         scroller.scrollTo({
+    //             left: scroller.scrollLeft + 400,
+    //             behavior: 'smooth'
+    //         });
+    //     }
+    // };
+
+    const scrollShift = (newScroll, scrollWidth) => {
+        if (newScroll >= scrollWidth / 2) {
+            return scrollWidth / 2 - newScroll
+        }
+        return newScroll
+    }
+
     const onArrowCLick = () => {
         const scroller = ref.current.querySelector('.section__panel:not(.section__panel_hidden)');
         if (scroller) {
+
+            const currentScroll = scroller.scrollLeft;
+
             scroller.scrollTo({
-                left: scroller.scrollLeft + 400,
+                left: currentScroll + 400,
                 behavior: 'smooth'
             });
         }
     };
+
+    const onHandScroll = () => {
+        const scroller = ref.current.querySelector('.section__panel:not(.section__panel_hidden)');
+        if (scroller) {
+
+            const scrollWidth = scroller.scrollWidth; // Получаем полную ширину скроллируемого элемента
+            const currentScroll = scroller.scrollLeft; // Текущее положение скролла
+
+            const scrollPos = scrollShift(currentScroll, scrollWidth)
+
+            // console.log("hand ", currentScroll, scrollWidth, scrollPos)
+
+            if (scrollPos < currentScroll) {
+                scroller.scrollTo({
+                    left: 0,
+                });
+            }
+        }
+    }
+
 
     return <main className="main">
         <section className="section main__general">
@@ -170,8 +213,8 @@ export function Main() {
 
             <div className="section__panel-wrapper" ref={ref}>
                 {TABS_KEYS.map(key =>
-                    <div key={key} role="tabpanel" className={'section__panel' + (key === activeTab ? '' : ' section__panel_hidden')} aria-hidden={key === activeTab ? 'false' : 'true'} id={`panel_${key}`} aria-labelledby={`tab_${key}`}>
-                        <ul className="section__panel-list">
+                    <div key={key} role="tabpanel" className={'section__panel' + (key === activeTab ? '' : ' section__panel_hidden')} onScroll={onHandScroll} aria-hidden={key === activeTab ? 'false' : 'true'} id={`panel_${key}`} aria-labelledby={`tab_${key}`}>
+                        <ul className="section__panel-list" >
                             {TABS[key].items.map((item, index) =>
                                 <Event
                                     key={index}
@@ -179,6 +222,16 @@ export function Main() {
                                     onSize={onSize}
                                 />
                             )}
+
+                            {key === "all" && TABS[key].items.map((item, index) =>
+                                <Event
+                                    key={index}
+                                    {...item}
+                                    onSize={onSize}
+                                />
+                            )
+                            }
+
                         </ul>
                     </div>
                 )}
