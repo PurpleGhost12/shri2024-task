@@ -9,8 +9,6 @@ export function Main() {
     const [activeTab, setActiveTab] = React.useState('');
     const [hasRightScroll, setHasRightScroll] = React.useState(false);
 
-    const [scrollOffset, setScrollOffset] = React.useState(0);
-
     React.useEffect(() => {
         if (!activeTab && !initedRef.current) {
             initedRef.current = true;
@@ -38,87 +36,16 @@ export function Main() {
         }
     });
 
-    // const onArrowCLick = () => {
-    //     const scroller = ref.current.querySelector('.section__panel:not(.section__panel_hidden)');
-    //     if (scroller) {
-    //         scroller.scrollTo({
-    //             left: scroller.scrollLeft + 400,
-    //             behavior: 'smooth'
-    //         });
-    //     }
-    // };
 
-    function debounce(func, ms) {
-        let wait = false;
-        return function () {
-            if (wait) return;
-            wait = true;
-            setTimeout(() => {
-                wait = false;
-                func.apply(this, arguments);
-            }, ms);
-        };
-    }
-
-
-    const scrollShift = (newScroll, scrollWidth) => {
-        if (newScroll >= scrollWidth / 3) {
-            return newScroll - scrollWidth / 3 //Math.floor() 
-        }
-        return newScroll
-    }
-
-    let destination = 0
     const onArrowCLick = () => {
         const scroller = ref.current.querySelector('.section__panel:not(.section__panel_hidden)');
         if (scroller) {
-
-            const currentScroll = scroller.scrollLeft;
-            const scrollWidth = scroller.scrollWidth;
-
-            //endScrollPos = Math.max(0, currentScroll + 400 - scrollWidth / 2);
-            destination = currentScroll + 400 //Math.max(0, currentScroll + 400 - scrollWidth / 3);
-            const scrollPos = scrollShift(currentScroll, scrollWidth)
-
-            //проверка текущего скролла?
-            if (scrollPos < currentScroll) { 
-                console.log("back arrow", currentScroll, scrollWidth, scrollPos)
-                scroller.scrollTo({
-                    left: scrollPos,
-                });
-            }
             scroller.scrollTo({
-                left: scrollPos + 400,
+                left: scroller.scrollLeft + 400,
                 behavior: 'smooth'
             });
         }
     };
-
-    const onHandScroll = () => {
-        const scroller = ref.current.querySelector('.section__panel:not(.section__panel_hidden)');
-        if (scroller) {
-
-            const scrollWidth = scroller.scrollWidth; // Получаем полную ширину скроллируемого элемента
-            const currentScroll = scroller.scrollLeft; // Текущее положение скролла
-
-            const scrollPos = scrollShift(currentScroll, scrollWidth)
-
-            // console.log("hand ", currentScroll, scrollWidth, scrollPos)
-            // console.log("destination ", destination)
-
-            if (scrollPos < currentScroll && (destination < currentScroll)) { 
-                // console.log("back ", currentScroll, scrollWidth, scrollPos)
-                scroller.scrollTo({
-                    left: scrollPos,
-                });
-
-            }
-
-        }
-    }
-
-    const onScrollDebounce = debounce(onHandScroll, 100)
-
 
     return <main className="main">
         <section className="section main__general">
@@ -245,7 +172,7 @@ export function Main() {
 
             <div className="section__panel-wrapper" ref={ref}>
                 {TABS_KEYS.map(key =>
-                    <div key={key} role="tabpanel" className={'section__panel' + (key === activeTab ? '' : ' section__panel_hidden')} onScroll={onScrollDebounce} aria-hidden={key === activeTab ? 'false' : 'true'} id={`panel_${key}`} aria-labelledby={`tab_${key}`}>
+                    <div key={key} role="tabpanel" className={'section__panel' + (key === activeTab ? '' : ' section__panel_hidden')} aria-hidden={key === activeTab ? 'false' : 'true'} id={`panel_${key}`} aria-labelledby={`tab_${key}`}>
                         <ul className="section__panel-list" >
                             {TABS[key].items.map((item, index) =>
                                 <Event
