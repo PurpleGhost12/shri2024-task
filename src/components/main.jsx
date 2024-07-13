@@ -48,9 +48,22 @@ export function Main() {
     //     }
     // };
 
+    function debounce(func, ms) {
+        let wait = false;
+        return function () {
+            if (wait) return;
+            wait = true;
+            setTimeout(() => {
+                wait = false;
+                func.apply(this, arguments);
+            }, ms);
+        };
+    }
+
+
     const scrollShift = (newScroll, scrollWidth) => {
-        if (newScroll >= scrollWidth / 2) {
-            return newScroll - scrollWidth / 2
+        if (newScroll >= scrollWidth / 3) {
+            return newScroll - scrollWidth / 3 //Math.floor() 
         }
         return newScroll
     }
@@ -61,14 +74,21 @@ export function Main() {
         if (scroller) {
 
             const currentScroll = scroller.scrollLeft;
-
             const scrollWidth = scroller.scrollWidth;
 
             //endScrollPos = Math.max(0, currentScroll + 400 - scrollWidth / 2);
-            destination = currentScroll + 400
+            destination = currentScroll + 400 //Math.max(0, currentScroll + 400 - scrollWidth / 3);
+            const scrollPos = scrollShift(currentScroll, scrollWidth)
 
+            //проверка текущего скролла?
+            if (scrollPos < currentScroll) { 
+                console.log("back arrow", currentScroll, scrollWidth, scrollPos)
+                scroller.scrollTo({
+                    left: scrollPos,
+                });
+            }
             scroller.scrollTo({
-                left: currentScroll + 400,
+                left: scrollPos + 400,
                 behavior: 'smooth'
             });
         }
@@ -84,30 +104,20 @@ export function Main() {
             const scrollPos = scrollShift(currentScroll, scrollWidth)
 
             // console.log("hand ", currentScroll, scrollWidth, scrollPos)
+            // console.log("destination ", destination)
 
-            if (scrollPos < currentScroll && (destination === 0 || currentScroll >= destination)) {
+            if (scrollPos < currentScroll && (destination < currentScroll)) { 
+                // console.log("back ", currentScroll, scrollWidth, scrollPos)
                 scroller.scrollTo({
                     left: scrollPos,
                 });
 
-                destination = 0
-
-                // if (endScrollPos > 0) {
-                //     console.log("forward")
-                //     scroller.scrollTo({
-                //         left: endScrollPos - scrollPos,
-                //         behavior: 'smooth'
-                //     });
-                //     endScrollPos = 0
-
-                // }
             }
-            // if (scrollPos < currentScroll && currentScroll >= destination) {
-
-            // }
 
         }
     }
+
+    const onScrollDebounce = debounce(onHandScroll, 100)
 
 
     return <main className="main">
@@ -235,7 +245,7 @@ export function Main() {
 
             <div className="section__panel-wrapper" ref={ref}>
                 {TABS_KEYS.map(key =>
-                    <div key={key} role="tabpanel" className={'section__panel' + (key === activeTab ? '' : ' section__panel_hidden')} onScroll={onHandScroll} aria-hidden={key === activeTab ? 'false' : 'true'} id={`panel_${key}`} aria-labelledby={`tab_${key}`}>
+                    <div key={key} role="tabpanel" className={'section__panel' + (key === activeTab ? '' : ' section__panel_hidden')} onScroll={onScrollDebounce} aria-hidden={key === activeTab ? 'false' : 'true'} id={`panel_${key}`} aria-labelledby={`tab_${key}`}>
                         <ul className="section__panel-list" >
                             {TABS[key].items.map((item, index) =>
                                 <Event
@@ -245,6 +255,14 @@ export function Main() {
                                 />
                             )}
 
+                            {key === "all" && TABS[key].items.map((item, index) =>
+                                <Event
+                                    key={index}
+                                    {...item}
+                                    onSize={onSize}
+                                />
+                            )
+                            }
                             {key === "all" && TABS[key].items.map((item, index) =>
                                 <Event
                                     key={index}
