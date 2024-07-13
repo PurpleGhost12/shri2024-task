@@ -181,24 +181,6 @@ export function Main() {
                                     onSize={onSize}
                                 />
                             )}
-
-                            {key === "all" && TABS[key].items.map((item, index) =>
-                                <Event
-                                    key={index}
-                                    {...item}
-                                    onSize={onSize}
-                                />
-                            )
-                            }
-                            {key === "all" && TABS[key].items.map((item, index) =>
-                                <Event
-                                    key={index}
-                                    {...item}
-                                    onSize={onSize}
-                                />
-                            )
-                            }
-
                         </ul>
                     </div>
                 )}
